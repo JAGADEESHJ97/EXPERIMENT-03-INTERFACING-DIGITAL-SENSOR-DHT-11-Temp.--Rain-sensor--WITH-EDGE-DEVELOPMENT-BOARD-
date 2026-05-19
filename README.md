@@ -2,10 +2,10 @@
 
 ---
 
-### **NAME:**  
-### **DEPARTMENT:**  
-### **ROLL NO:**  
-### **DATE OF EXPERIMENT:**  
+### **NAME: JAGADEESH J**  
+### **DEPARTMENT: IoT**  
+### **ROLL NO: 212223110015**  
+### **DATE OF EXPERIMENT: 19.5.26**  
 
 ---
 
@@ -72,6 +72,40 @@ Experiment 4A
 ```
 
 
+import Adafruit_DHT
+import paho.mqtt.client as mqtt
+import ssl
+import time
+
+DHT_SENSOR = Adafruit_DHT.DHT11
+DHT_PIN = 18 # GPI04
+HiveMQ Cloud Credentials
+MQTT_BROKER = "39642c2516484165aca71f1701831c31.s1.eu.hivemq.cloud"
+MQTT_PORT = 8883
+MQTT_USER = "hivemq. webclient . 1778574692951"
+MQTT_PASSWORD = "s4>?q:SPh2DZFxr63C.j"
+TEMP_TOPIC = "raspberrypi/dht/temperature"
+HUM_TOPIC = "raspberrypi/dht/humidity"
+client = mqtt.Client()
+client.username_pw_set(MQTT_USER, MQTT_PASSWORD)
+client.tls_set(tls_version=ssl.PROTOCOL_TLS)
+client.connect (MQTT_BROKER, MQTT_PORT)
+print("Connected to HiveMQ Cloud")
+print("Reading DHT11 Sensor ... \n")
+while True:
+humidity, temperature = Adafruit_DHT.read(DHT_SENSOR, DHT_PIN)
+if humidity is not None and temperature is not None:
+print(f"Temperature = {temperature} C")
+print(f"Humidity = {humidity} %")
+print("-
+# Publish to HiveMQ
+client.publish(TEMP_TOPIC, temperature)
+client.publish(HUM_TOPIC, humidity)
+print("Data sent to HiveMQ\n")
+
+print("Sensor failure. Check wiring.")
+time.sleep(10)
+
  
 
 
@@ -82,11 +116,18 @@ Experiment 4A
 ### OUPUT  
 Experiment 4A
 
-# FIGURE -04 ADD TITILE HERE 
+# FIGURE -04 OUTPUT:
+<img width="1918" height="1078" alt="Screenshot 2026-05-12 140916" src="https://github.com/user-attachments/assets/7ca105f8-4ac8-4ed0-b3c4-c24aab41fcdf" />
 
-#  FIGURE -05 ADD TITILE HERE 
 
-# FIGURE -06 ADD TITLE HERE 
+#  FIGURE -05 CLOUD OUTPUT:
+<img width="1918" height="993" alt="Screenshot 2026-05-12 141642" src="https://github.com/user-attachments/assets/df7d853b-aa70-4f3f-ab8d-0f30c2c22eff" />
+
+
+
+# FIGURE -06 CIRCUIT:
+<img width="720" height="1280" alt="image" src="https://github.com/user-attachments/assets/3f33e927-c59f-4462-b490-5ddec600e28c" />
+
 
 Experiment 4B
 ## PROGRAM (Python)
@@ -94,7 +135,106 @@ Experiment 4B
 
 
  
+import time
+import ssl
+import json
+import RPi.GPIO as GPIO
+import paho.mqtt.client as mqtt
 
+# =====================================================
+# GPIO SETUP
+# =====================================================
+
+GPIO.setmode(GPIO.BCM)
+GPIO.setwarnings(False)
+
+RAIN_SENSOR_PIN = 2
+
+GPIO.setup(RAIN_SENSOR_PIN, GPIO.IN)
+
+# =====================================================
+# MQTT SETUP
+# =====================================================
+
+MQTT_BROKER = "39642c2516484165aca71f1701831c31.s1.eu.hivemq.cloud"
+MQTT_PORT = 8883
+MQTT_USER = "hivemq.webclient.1779176580133"
+MQTT_PASSWORD = "RM3eD28<dZ,7vftHc*W."
+
+MQTT_TOPIC = "raspberrypi/rain"
+
+client = mqtt.Client()
+
+client.username_pw_set(
+    MQTT_USER,
+    MQTT_PASSWORD
+)
+
+client.tls_set(
+    tls_version=ssl.PROTOCOL_TLS
+)
+
+# =====================================================
+# CONNECT TO HIVEMQ
+# =====================================================
+
+print("Connecting to HiveMQ Cloud...")
+
+client.connect(
+    MQTT_BROKER,
+    MQTT_PORT
+)
+
+client.loop_start()
+
+print("Connected Successfully")
+
+# =====================================================
+# MAIN LOOP
+# =====================================================
+
+try:
+
+    while True:
+
+        rain_value = GPIO.input(RAIN_SENSOR_PIN)
+
+        # ACTIVE LOW SENSOR
+        if rain_value == 0:
+
+            status = "RAIN DETECTED"
+            rain_status = 1
+
+        else:
+
+            status = "NO RAIN"
+            rain_status = 0
+
+        print(status)
+
+        payload = {
+            "rain_status": rain_status,
+            "message": status
+        }
+
+        client.publish(
+            MQTT_TOPIC,
+            json.dumps(payload)
+        )
+
+        print("Data Published")
+        print(payload)
+
+        time.sleep(5)
+
+except KeyboardInterrupt:
+
+    print("Program Stopped")
+
+    GPIO.cleanup()
+
+    client.loop_stop()
+    client.disconnect()
 
 
  
@@ -102,11 +242,17 @@ Experiment 4B
 
 ### OUPUT  
 
-# FIGURE -07 ADD TITILE HERE 
+# FIGURE -07 OUTPUT:
+<img width="1600" height="934" alt="image" src="https://github.com/user-attachments/assets/46923f2c-8e69-4ca5-89bc-9c18a466909b" />
 
-#  FIGURE -08 ADD TITILE HERE 
 
-# FIGURE -09 ADD TITLE HERE 
+#  FIGURE -08 CLOUD OUTPUT:
+<img width="1600" height="852" alt="image" src="https://github.com/user-attachments/assets/4bb30239-ff96-46c5-a996-e075026ff42e" />
+
+
+# FIGURE -09 CIRCUIT:
+<img width="720" height="1280" alt="image" src="https://github.com/user-attachments/assets/69482c47-51b1-458d-9b21-d38a6ea27a30" />
+
 
 
 
